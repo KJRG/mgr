@@ -2,6 +2,7 @@ package io.github.kjrg.mgr;
 
 import java.io.IOException;
 
+import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -11,8 +12,13 @@ import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.stats.StatsListener;
+import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -40,6 +46,7 @@ public class App {
 		int seed = 123;
 		int numberOfEpochs = 100;
 		double learningRate = 0.05;
+		double momentum = 0.9;
 
 		DataProvider dataProvider = new DataProvider();
         DataSet trainDataset = null;
@@ -48,6 +55,11 @@ public class App {
 		try {
 			trainDataset = dataProvider.readDatasetFromFile(TRAINING_DATASET_FILEPATH, trainingDatasetSize, labelColumnIndex, numberOfLabels);
 			testDataset = dataProvider.readDatasetFromFile(TEST_DATASET_FILEPATH, testDatasetSize, labelColumnIndex, numberOfLabels);
+			
+			DataNormalization normalizer = new NormalizerStandardize();
+			normalizer.fit(trainDataset);
+			normalizer.transform(trainDataset);
+			normalizer.transform(testDataset);
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -68,13 +80,13 @@ public class App {
 				.weightInit(WeightInit.XAVIER)
 				.learningRate(learningRate)
 				.optimizationAlgo(OptimizationAlgorithm.LINE_GRADIENT_DESCENT)
-				.regularization(true).l2(1e-4)
+				.regularization(false)
 				.list()
 				.layer(0, new DenseLayer.Builder()
 						.nIn(numberOfInputs)
 						.nOut(numberOfHiddenNeurons)
-						.activation("tanh")
-						.updater(Updater.ADADELTA)
+						.activation("softmax")
+						.updater(Updater.ADAM).momentum(momentum)
 						.build())
 				.layer(1, new OutputLayer.Builder(
 						LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
@@ -88,6 +100,11 @@ public class App {
 		
 		MultiLayerNetwork model = new MultiLayerNetwork(conf);
         model.init();
+        
+        UIServer uiServer = UIServer.getInstance();
+        StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
+        uiServer.attach(statsStorage);
+        model.setListeners(new StatsListener(statsStorage));
         
     	for (int n = 0; n < numberOfEpochs; n++) {
     		model.fit(trainDataset);
