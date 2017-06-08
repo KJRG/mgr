@@ -12,11 +12,12 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 public class DataProvider {
 
-	private static final String COMMA_SEPARATOR = ";";
+	private static final int LINES_TO_SKIP = 0;
+	private static final String SEPARATOR = ";";
 
 	public DataSet readDatasetFromFile(String filepath, int batchSize, int labelColumnIndex, int numberOfLabels)
 			throws IOException, InterruptedException {
-		RecordReader recordReader = new CSVRecordReader(0, COMMA_SEPARATOR);
+		RecordReader recordReader = new CSVRecordReader(LINES_TO_SKIP, SEPARATOR);
 		recordReader.initialize(new FileSplit(new File(filepath)));
 		DataSetIterator datasetIterator = new RecordReaderDataSetIterator(recordReader, batchSize, labelColumnIndex,
 				numberOfLabels);

@@ -1,6 +1,8 @@
 package io.github.kjrg.mgr;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
@@ -26,21 +28,15 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
  */
 public class App {
 
-	private static final String TRAINING_DATASET_FILEPATH = "D:\\Praca magisterska\\dane\\cleveland_binary_training_data.csv";
-	private static final String TEST_DATASET_FILEPATH = "D:\\Praca magisterska\\dane\\cleveland_binary_test_data.csv";
-
+	private static final String CONFIGURATION_FILEPATH = "configuration.properties";
+	
 	public static void main(String[] args) {
 		
 		System.out.println("Starting the application...");
 		
 		int numberOfInputs = 13;
-		int numberOfHiddenNeurons = 2;
+		int numberOfHiddenNeurons = 13;
 		int numberOfOutputs = 2;
-		
-		int trainingDatasetSize = 238;
-		int testDatasetSize = 59;
-		int labelColumnIndex = 13;
-		int numberOfLabels = 2;
 		
 		int iterations = 100;
 		int seed = 123;
@@ -52,14 +48,28 @@ public class App {
         DataSet trainDataset = null;
     	DataSet testDataset = null;
     	System.out.println("Reading data...");
-		try {
-			trainDataset = dataProvider.readDatasetFromFile(TRAINING_DATASET_FILEPATH, trainingDatasetSize, labelColumnIndex, numberOfLabels);
-			testDataset = dataProvider.readDatasetFromFile(TEST_DATASET_FILEPATH, testDatasetSize, labelColumnIndex, numberOfLabels);
+    	
+		try(InputStream inputStream = App.class.getClassLoader().getResourceAsStream(CONFIGURATION_FILEPATH)) {
+			Properties properties = new  Properties();
+			if (inputStream != null) {
+				properties.load(inputStream);
+			} else {
+				System.err.println("The configuration file could not be found.");
+				System.exit(1);
+			}
 			
-			DataNormalization normalizer = new NormalizerStandardize();
-			normalizer.fit(trainDataset);
-			normalizer.transform(trainDataset);
-			normalizer.transform(testDataset);
+			String trainingDatasetFilepath = properties.getProperty("data.training_dataset_filepath");
+			String testDatasetFilepath = properties.getProperty("data.test_dataset_filepath");
+			int trainingDatasetSize = Integer.parseInt(properties.getProperty("data.training_dataset_size"));
+			int testDatasetSize = Integer.parseInt(properties.getProperty("data.test_dataset_size"));
+			int labelColumnIndex = Integer.parseInt(properties.getProperty("data.label_column_index"));
+			int numberOfLabels = Integer.parseInt(properties.getProperty("data.number_of_labels"));
+			
+			System.out.println("Loading training data from " + trainingDatasetFilepath);
+			trainDataset = dataProvider.readDatasetFromFile(trainingDatasetFilepath, trainingDatasetSize, labelColumnIndex, numberOfLabels);
+			System.out.println("Loading test data from " + testDatasetFilepath);
+			testDataset = dataProvider.readDatasetFromFile(testDatasetFilepath, testDatasetSize, labelColumnIndex, numberOfLabels);
+			
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -74,6 +84,11 @@ public class App {
 			System.exit(1);
 		}
 
+		DataNormalization normalizer = new NormalizerStandardize();
+		normalizer.fit(trainDataset);
+		normalizer.transform(trainDataset);
+		normalizer.transform(testDataset);
+		
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
 				.seed(seed)
 				.iterations(iterations)
@@ -100,11 +115,6 @@ public class App {
 		
 		MultiLayerNetwork model = new MultiLayerNetwork(conf);
         model.init();
-        
-        UIServer uiServer = UIServer.getInstance();
-        StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
-        uiServer.attach(statsStorage);
-        model.setListeners(new StatsListener(statsStorage));
         
     	for (int n = 0; n < numberOfEpochs; n++) {
     		model.fit(trainDataset);
