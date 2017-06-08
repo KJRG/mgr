@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -12,12 +11,7 @@ import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.ui.api.UIServer;
-import org.deeplearning4j.ui.stats.StatsListener;
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
@@ -113,21 +107,14 @@ public class App {
 				.pretrain(false)
 				.build();
 		
-		MultiLayerNetwork model = new MultiLayerNetwork(conf);
-        model.init();
-        
-    	for (int n = 0; n < numberOfEpochs; n++) {
-    		model.fit(trainDataset);
-    	}
-    	
-    	Evaluation eval = new Evaluation(numberOfOutputs);
+		TestRunner testRunner = new TestRunner();
+		Evaluation result = testRunner.runTest(trainDataset, testDataset, conf, numberOfEpochs, numberOfOutputs);
 
-    	INDArray features = testDataset.getFeatureMatrix();
-    	INDArray labels = testDataset.getLabels();
-    	INDArray predicted = model.output(features, false);
+		DenseLayer layer = (DenseLayer) conf.getConf(0).getLayer();
+        System.out.println("\nNumber of neurons in hidden layer: " + layer.getNIn());
+        System.out.println("Activation function: " + layer.getActivationFunction());
+        System.out.println("Updater: " + layer.getUpdater());
     	
-    	eval.eval(labels, predicted);
-    	
-    	System.out.println(eval.stats());
+    	System.out.println(result.stats());
 	}
 }
