@@ -109,12 +109,8 @@ public class App {
 		
 		TestRunner testRunner = new TestRunner();
 		Evaluation result = testRunner.runTest(trainDataset, testDataset, conf, numberOfEpochs, numberOfOutputs);
-
-		DenseLayer layer = (DenseLayer) conf.getConf(0).getLayer();
-        System.out.println("\nNumber of neurons in hidden layer: " + layer.getNIn());
-        System.out.println("Activation function: " + layer.getActivationFunction());
-        System.out.println("Updater: " + layer.getUpdater());
-    	
-    	System.out.println(result.stats());
+		
+		ExperimentInfoCreator experimentInfoCreator = new ExperimentInfoCreator();
+		System.out.println(experimentInfoCreator.createInfo(conf, result).getInformationText());
 	}
 }
