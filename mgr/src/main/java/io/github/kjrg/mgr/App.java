@@ -2,20 +2,14 @@ package io.github.kjrg.mgr;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 import org.deeplearning4j.eval.Evaluation;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
  * Main class of application.
@@ -27,24 +21,16 @@ public class App {
 	public static void main(String[] args) {
 		
 		System.out.println("Starting the application...");
-		
-		int numberOfInputs = 13;
-		int numberOfHiddenNeurons = 13;
-		int numberOfOutputs = 2;
-		
-		int iterations = 100;
-		int seed = 123;
-		int numberOfEpochs = 100;
-		double learningRate = 0.05;
-		double momentum = 0.9;
+		Integer numberOfClasses = null;
+		Integer numberOfEpochs = null;
 
-		DataProvider dataProvider = new DataProvider();
+		Properties properties = null;
         DataSet trainDataset = null;
     	DataSet testDataset = null;
-    	System.out.println("Reading data...");
+    	System.out.println("Loading data...");
     	
 		try(InputStream inputStream = App.class.getClassLoader().getResourceAsStream(CONFIGURATION_FILEPATH)) {
-			Properties properties = new  Properties();
+			properties = new Properties();
 			if (inputStream != null) {
 				properties.load(inputStream);
 			} else {
@@ -57,12 +43,15 @@ public class App {
 			int trainingDatasetSize = Integer.parseInt(properties.getProperty("data.training_dataset_size"));
 			int testDatasetSize = Integer.parseInt(properties.getProperty("data.test_dataset_size"));
 			int labelColumnIndex = Integer.parseInt(properties.getProperty("data.label_column_index"));
-			int numberOfLabels = Integer.parseInt(properties.getProperty("data.number_of_labels"));
+			numberOfClasses = Integer.parseInt(properties.getProperty("data.number_of_labels"));
+			numberOfEpochs = Integer.parseInt(properties.getProperty("number_of_epochs"));
+			
+			DataProvider dataProvider = new DataProvider();
 			
 			System.out.println("Loading training data from " + trainingDatasetFilepath);
-			trainDataset = dataProvider.readDatasetFromFile(trainingDatasetFilepath, trainingDatasetSize, labelColumnIndex, numberOfLabels);
+			trainDataset = dataProvider.readDatasetFromFile(trainingDatasetFilepath, trainingDatasetSize, labelColumnIndex, numberOfClasses);
 			System.out.println("Loading test data from " + testDatasetFilepath);
-			testDataset = dataProvider.readDatasetFromFile(testDatasetFilepath, testDatasetSize, labelColumnIndex, numberOfLabels);
+			testDataset = dataProvider.readDatasetFromFile(testDatasetFilepath, testDatasetSize, labelColumnIndex, numberOfClasses);
 			
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -70,11 +59,11 @@ public class App {
 		}
 		
 		if (trainDataset == null) {
-			System.out.println("The training data could not be read.");
+			System.err.println("The training data could not be read.");
 			System.exit(1);
 		}
 		if (testDataset == null) {
-			System.out.println("The test data could not be read.");
+			System.err.println("The test data could not be read.");
 			System.exit(1);
 		}
 
@@ -83,34 +72,16 @@ public class App {
 		normalizer.transform(trainDataset);
 		normalizer.transform(testDataset);
 		
-		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-				.seed(seed)
-				.iterations(iterations)
-				.weightInit(WeightInit.XAVIER)
-				.learningRate(learningRate)
-				.optimizationAlgo(OptimizationAlgorithm.LINE_GRADIENT_DESCENT)
-				.regularization(false)
-				.list()
-				.layer(0, new DenseLayer.Builder()
-						.nIn(numberOfInputs)
-						.nOut(numberOfHiddenNeurons)
-						.activation("softmax")
-						.updater(Updater.ADAM).momentum(momentum)
-						.build())
-				.layer(1, new OutputLayer.Builder(
-						LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-						.activation("softmax")
-						.nIn(numberOfHiddenNeurons)
-						.nOut(numberOfOutputs)
-						.build())
-				.backprop(true)
-				.pretrain(false)
-				.build();
+		NeuralNetworkConfigurationProvider neuralNetworkConfigurationProvider = new NeuralNetworkConfigurationProvider();
+		List<MultiLayerConfiguration> neuralNetworkConfigurations =
+				neuralNetworkConfigurationProvider.readConfigurationsFromProperties(properties);
 		
-		TestRunner testRunner = new TestRunner();
-		Evaluation result = testRunner.runTest(trainDataset, testDataset, conf, numberOfEpochs, numberOfOutputs);
-		
-		ExperimentInfoCreator experimentInfoCreator = new ExperimentInfoCreator();
-		System.out.println(experimentInfoCreator.createInfo(conf, result).getInformationText());
+		for (MultiLayerConfiguration configuration : neuralNetworkConfigurations) {
+			TestRunner testRunner = new TestRunner();
+			Evaluation result = testRunner.runTest(trainDataset, testDataset, configuration, numberOfEpochs, numberOfClasses);
+
+			ExperimentInfoCreator experimentInfoCreator = new ExperimentInfoCreator();
+			System.out.println(experimentInfoCreator.createInfo(configuration, result).getInformationText());
+		}
 	}
 }

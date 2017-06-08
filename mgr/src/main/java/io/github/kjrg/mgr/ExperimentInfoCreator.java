@@ -26,12 +26,12 @@ public class ExperimentInfoCreator {
 	public ExperimentInfoDTO createInfo(MultiLayerConfiguration neuralNetworkConfiguration,
 			Evaluation experimentResult) {
 
-		NeuralNetConfiguration configuration =  neuralNetworkConfiguration.getConf(INDEX_OF_HIDDEN_LAYER);
+		NeuralNetConfiguration configuration = neuralNetworkConfiguration.getConf(INDEX_OF_HIDDEN_LAYER);
 		if (configuration == null) {
 			throw new IllegalStateException("The network has no hidden layer");
 		}
 		
-		DenseLayer	layer = (DenseLayer) configuration.getLayer();
+		DenseLayer layer = (DenseLayer) configuration.getLayer();
 		if (layer == null) {
 			throw new IllegalStateException("The network has no hidden layer");
 		}

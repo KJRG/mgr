@@ -30,7 +30,7 @@ public class TestRunner {
 		MultiLayerNetwork model = new MultiLayerNetwork(configuration);
         model.init();
         
-        // Learn the neural network
+        // Train the neural network
     	for (int n = 0; n < numberOfEpochs; n++) {
     		model.fit(trainDataset);
     	}
