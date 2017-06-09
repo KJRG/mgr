@@ -76,11 +76,11 @@ public class App {
 		List<MultiLayerConfiguration> neuralNetworkConfigurations =
 				neuralNetworkConfigurationProvider.readConfigurationsFromProperties(properties);
 		
-		for (MultiLayerConfiguration configuration : neuralNetworkConfigurations) {
-			TestRunner testRunner = new TestRunner();
+		TestRunner testRunner = new TestRunner();
+		ExperimentInfoCreator experimentInfoCreator = new ExperimentInfoCreator();
+		
+		for (MultiLayerConfiguration configuration : neuralNetworkConfigurations) {	
 			Evaluation result = testRunner.runTest(trainDataset, testDataset, configuration, numberOfEpochs, numberOfClasses);
-
-			ExperimentInfoCreator experimentInfoCreator = new ExperimentInfoCreator();
 			System.out.println(experimentInfoCreator.createInfo(configuration, result).getInformationText());
 		}
 	}
