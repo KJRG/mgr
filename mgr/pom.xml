@@ -14,6 +14,7 @@
 		<junit.version>4.12</junit.version>
 		<nd4j.version>0.7.0</nd4j.version>
 		<dl4j.version>0.7.0</dl4j.version>
+		<apache-poi.version>3.16</apache-poi.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
@@ -47,6 +48,21 @@
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-ui_2.10</artifactId>
 			<version>${dl4j.version}</version>
+		</dependency>
+
+		<!-- Apache POI -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>${apache-poi.version}</version>
+		</dependency>
+
+
+		<!-- Apache POI OOXML -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${apache-poi.version}</version>
 		</dependency>
 
 

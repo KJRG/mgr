@@ -10,6 +10,11 @@ import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
+/**
+ * Class responsible for providing datasets.
+ * 
+ * @author Krzysztof Ga³ka
+ */
 public class DataProvider {
 
 	private static final int LINES_TO_SKIP = 0;
