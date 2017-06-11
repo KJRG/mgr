@@ -43,7 +43,6 @@ public class NeuralNetworkConfigurationProvider {
 		int seed = Integer.parseInt(properties.getProperty("seed"));
 		int iterations = Integer.parseInt(properties.getProperty("iterations"));
 		double learningRate = Double.parseDouble(properties.getProperty("learning_rate"));
-		double momentum = Double.parseDouble(properties.getProperty("momentum"));
 
 		String activationFunctionsProperty = properties.getProperty("activation_functions");
 		String updatersProperty = properties.getProperty("updaters");
@@ -56,7 +55,6 @@ public class NeuralNetworkConfigurationProvider {
 
 		DenseLayer hiddenLayerPrototype = new DenseLayer.Builder()
 				.nIn(numberOfInputs)
-				.momentum(momentum)
 				.build();
 
 		List<DenseLayer> allPossibleHiddenLayers = new DenseLayerListBuilder(Arrays.asList(hiddenLayerPrototype))
