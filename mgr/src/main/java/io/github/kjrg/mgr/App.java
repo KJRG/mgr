@@ -106,7 +106,7 @@ public class App {
 			Evaluation result = testRunner.runTest(trainDataset, testDataset, configuration, numberOfEpochs, numberOfClasses);
 			ExperimentInfoDTO experimentResult = experimentInfoCreator.createInfo(configuration, result);
 			experimentResultList.add(experimentResult);
-			System.out.println(experimentResult.getInformationText());
+			System.out.println(System.lineSeparator() + experimentResult.getInformationText());
 		}
 		
 		/*

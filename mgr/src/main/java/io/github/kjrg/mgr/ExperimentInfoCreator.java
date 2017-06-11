@@ -36,6 +36,6 @@ public class ExperimentInfoCreator {
 			throw new IllegalStateException("The network has no hidden layer");
 		}
 
-		return new ExperimentInfoDTO(layer.getNIn(), layer.getActivationFunction(), layer.getUpdater(), experimentResult);
+		return new ExperimentInfoDTO(layer.getNOut(), layer.getActivationFunction(), layer.getUpdater(), experimentResult);
 	}
 }
