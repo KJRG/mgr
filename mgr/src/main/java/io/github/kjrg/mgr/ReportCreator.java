@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -38,42 +40,59 @@ public class ReportCreator {
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		XSSFSheet sheet = workbook.createSheet(EXPERIMENT_RESULTS_SHEET_NAME);
 
-		int rowNumber = createHeader(sheet);
-		addExperimentResultsToReport(experimentResultList, sheet, rowNumber);
+		int numberOfRowsInHeader = createHeader(workbook, sheet);
+		addExperimentResultsToReport(experimentResultList, sheet, numberOfRowsInHeader);
+		autoSizeColumns(sheet, NUMBER_OF_COLUMNS_IN_RESULTS_SHEET);
 		saveReport(workbook, outputFilepath);
 		workbook.close();
 	}
 
-	private int createHeader(XSSFSheet sheet) {
+	private int createHeader(XSSFWorkbook workbook, XSSFSheet sheet) {
 		int rowNumber = 0;
 
 		Row row = sheet.createRow(rowNumber++);
+		CellStyle headerStyle = createHeaderStyle(workbook);
+
 		for (int i = 0; i < NUMBER_OF_COLUMNS_IN_RESULTS_SHEET; i++) {
 			Cell cell = row.createCell(i);
 
 			switch (i) {
 			case 0:
 				cell.setCellValue("Neurons in hidden layer");
+				cell.setCellStyle(headerStyle);
 				break;
 			case 1:
 				cell.setCellValue("Acivation function");
+				cell.setCellStyle(headerStyle);
 				break;
 			case 2:
 				cell.setCellValue("Updater");
+				cell.setCellStyle(headerStyle);
 				break;
 			case 3:
 				cell.setCellValue("F1 score");
+				cell.setCellStyle(headerStyle);
 				break;
 			case 4:
 				cell.setCellValue("Accuracy");
+				cell.setCellStyle(headerStyle);
 				break;
 			case 5:
 				cell.setCellValue("Recall");
+				cell.setCellStyle(headerStyle);
 				break;
 			}
 		}
 
 		return rowNumber;
+	}
+
+	private CellStyle createHeaderStyle(XSSFWorkbook workbook) {
+		CellStyle headerStyle = workbook.createCellStyle();
+		Font defaultFont = workbook.createFont();
+		defaultFont.setBold(true);
+		headerStyle.setFont(defaultFont);
+		return headerStyle;
 	}
 
 	private void addExperimentResultsToReport(List<ExperimentInfoDTO> experimentResultList, XSSFSheet sheet,
@@ -117,6 +136,12 @@ public class ReportCreator {
 				cell.setCellValue(experimentEvaluation.recall());
 				break;
 			}
+		}
+	}
+	
+	private void autoSizeColumns(XSSFSheet sheet, int numberOfColumns) {
+		for (int i = 0; i < numberOfColumns; i++) {
+			sheet.autoSizeColumn(i);
 		}
 	}
 
