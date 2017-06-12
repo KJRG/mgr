@@ -1,8 +1,11 @@
 package io.github.kjrg.mgr;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,6 +26,9 @@ import io.github.kjrg.mgr.dto.ExperimentInfoDTO;
  */
 public class ReportCreator {
 
+	private static final String XLSX_FILE_EXTENSION = ".xlsx";
+	private static final String REPORT_FILENAME_PREFIX = "results_";
+	private static final String DATE_AND_TIME_FORMAT_FOR_REPORT_FILENAME = "yyyy_MM_dd_HH_mm_ss_SSS";
 	private static final int NUMBER_OF_COLUMNS_IN_RESULTS_SHEET = 6;
 	private static final String EXPERIMENT_RESULTS_SHEET_NAME = "Results";
 
@@ -30,11 +36,11 @@ public class ReportCreator {
 	 * Create report.
 	 * 
 	 * @param experimentResultList results of experiments
-	 * @param outputFilepath filepath for report
+	 * @param outputDirectoryPath filepath for report
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void createReport(List<ExperimentInfoDTO> experimentResultList, String outputFilepath)
+	public void createReport(List<ExperimentInfoDTO> experimentResultList, String outputDirectoryPath)
 			throws FileNotFoundException, IOException {
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
@@ -43,7 +49,7 @@ public class ReportCreator {
 		int numberOfRowsInHeader = createHeader(workbook, sheet);
 		addExperimentResultsToReport(experimentResultList, sheet, numberOfRowsInHeader);
 		autoSizeColumns(sheet, NUMBER_OF_COLUMNS_IN_RESULTS_SHEET);
-		saveReport(workbook, outputFilepath);
+		saveReport(workbook, createOutputFilepath(outputDirectoryPath));
 		workbook.close();
 	}
 
@@ -143,6 +149,13 @@ public class ReportCreator {
 		for (int i = 0; i < numberOfColumns; i++) {
 			sheet.autoSizeColumn(i);
 		}
+	}
+
+	private String createOutputFilepath(String outputDirectoryPath) {
+		LocalDateTime currentDateAndTime = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_AND_TIME_FORMAT_FOR_REPORT_FILENAME);
+		return outputDirectoryPath + File.separator
+				+ REPORT_FILENAME_PREFIX + currentDateAndTime.format(formatter) + XLSX_FILE_EXTENSION;
 	}
 
 	private void saveReport(XSSFWorkbook workbook, String outputFilepath) throws FileNotFoundException, IOException {

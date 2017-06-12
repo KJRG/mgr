@@ -55,7 +55,7 @@ public class App {
 			int labelColumnIndex = Integer.parseInt(properties.getProperty("data.label_column_index"));
 			numberOfClasses = Integer.parseInt(properties.getProperty("data.number_of_labels"));
 			numberOfEpochs = Integer.parseInt(properties.getProperty("number_of_epochs"));
-			outputFilepath = properties.getProperty("report_filepath");
+			outputFilepath = properties.getProperty("report_directory_path");
 			
 			/*
 			 * Load data.
@@ -116,7 +116,7 @@ public class App {
 		try {
 			System.out.println(System.lineSeparator() + "Saving report");
 			reportCreator.createReport(experimentResultList, outputFilepath);
-			System.out.println("Report saved in " + outputFilepath);
+			System.out.println("Report saved in directory " + outputFilepath);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
