@@ -1,7 +1,7 @@
 package io.github.kjrg.mgr;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -21,7 +21,7 @@ import io.github.kjrg.mgr.dto.ExperimentInfoDTO;
  */
 public class App {
 
-	private static final String CONFIGURATION_FILEPATH = "configuration.properties";
+	private static final String DEFAULT_CONFIGURATION_FILEPATH = "configuration.properties";
 	private static final String DEFAULT_FILEPATH_FOR_REPORT = "results.xlsx";
 	
 	public static void main(String[] args) {
@@ -34,19 +34,15 @@ public class App {
 		Properties properties = null;
         DataSet trainDataset = null;
     	DataSet testDataset = null;
-    	System.out.println("Loading data...");
+    	String configurationFilepath = (args[0] == null || args[0].isEmpty()) ? DEFAULT_CONFIGURATION_FILEPATH : args[0];
     	
-		try(InputStream inputStream = App.class.getClassLoader().getResourceAsStream(CONFIGURATION_FILEPATH)) {
+		try(FileInputStream fileInputStream = new FileInputStream(configurationFilepath)) {
 			/*
 			 * Load configuration.
 			 */
+			System.out.println("Loading configuration from " + configurationFilepath);
 			properties = new Properties();
-			if (inputStream != null) {
-				properties.load(inputStream);
-			} else {
-				System.err.println("The configuration file could not be found.");
-				System.exit(1);
-			}
+			properties.load(fileInputStream);
 			
 			String trainingDatasetFilepath = properties.getProperty("data.training_dataset_filepath");
 			String testDatasetFilepath = properties.getProperty("data.test_dataset_filepath");
