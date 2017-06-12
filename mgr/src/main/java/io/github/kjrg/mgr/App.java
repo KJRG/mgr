@@ -22,14 +22,14 @@ import io.github.kjrg.mgr.dto.ExperimentInfoDTO;
 public class App {
 
 	private static final String DEFAULT_CONFIGURATION_FILEPATH = "configuration.properties";
-	private static final String DEFAULT_FILEPATH_FOR_REPORT = "results.xlsx";
+	private static final String DEFAULT_DIRECTORY_PATH_FOR_REPORT = "";
 	
 	public static void main(String[] args) {
 		
 		System.out.println("Starting the application...");
 		Integer numberOfClasses = null;
 		Integer numberOfEpochs = null;
-		String outputFilepath = DEFAULT_FILEPATH_FOR_REPORT;
+		String outputDirectoryPath = DEFAULT_DIRECTORY_PATH_FOR_REPORT;
 
 		Properties properties = null;
         DataSet trainDataset = null;
@@ -51,7 +51,7 @@ public class App {
 			int labelColumnIndex = Integer.parseInt(properties.getProperty("data.label_column_index"));
 			numberOfClasses = Integer.parseInt(properties.getProperty("data.number_of_labels"));
 			numberOfEpochs = Integer.parseInt(properties.getProperty("number_of_epochs"));
-			outputFilepath = properties.getProperty("report_directory_path");
+			outputDirectoryPath = properties.getProperty("report_directory_path");
 			
 			/*
 			 * Load data.
@@ -111,8 +111,8 @@ public class App {
 		ReportCreator reportCreator = new ReportCreator();
 		try {
 			System.out.println(System.lineSeparator() + "Saving report");
-			reportCreator.createReport(experimentResultList, outputFilepath);
-			System.out.println("Report saved in directory " + outputFilepath);
+			reportCreator.createReport(experimentResultList, outputDirectoryPath);
+			System.out.println("Report saved in directory " + outputDirectoryPath);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
