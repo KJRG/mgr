@@ -26,9 +26,9 @@ import io.github.kjrg.mgr.dto.ExperimentInfoDTO;
  */
 public class ReportCreator {
 
-	private static final String XLSX_FILE_EXTENSION = ".xlsx";
 	private static final String REPORT_FILENAME_PREFIX = "results_";
 	private static final String DATE_AND_TIME_FORMAT_FOR_REPORT_FILENAME = "yyyy_MM_dd_HH_mm_ss_SSS";
+	private static final String XLSX_FILE_EXTENSION = ".xlsx";
 	private static final int NUMBER_OF_COLUMNS_IN_RESULTS_SHEET = 6;
 	private static final String EXPERIMENT_RESULTS_SHEET_NAME = "Results";
 
@@ -36,7 +36,7 @@ public class ReportCreator {
 	 * Create report.
 	 * 
 	 * @param experimentResultList results of experiments
-	 * @param outputDirectoryPath filepath for report
+	 * @param outputDirectoryPath filepath of directory in which the report will be saved
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
