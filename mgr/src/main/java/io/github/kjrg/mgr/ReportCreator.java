@@ -29,7 +29,7 @@ public class ReportCreator {
 	private static final String REPORT_FILENAME_PREFIX = "results_";
 	private static final String DATE_AND_TIME_FORMAT_FOR_REPORT_FILENAME = "yyyy_MM_dd_HH_mm_ss_SSS";
 	private static final String XLSX_FILE_EXTENSION = ".xlsx";
-	private static final int NUMBER_OF_COLUMNS_IN_RESULTS_SHEET = 6;
+	private static final int NUMBER_OF_COLUMNS_IN_RESULTS_SHEET = 7;
 	private static final String EXPERIMENT_RESULTS_SHEET_NAME = "Results";
 
 	/**
@@ -84,6 +84,10 @@ public class ReportCreator {
 				cell.setCellStyle(headerStyle);
 				break;
 			case 5:
+				cell.setCellValue("Precision");
+				cell.setCellStyle(headerStyle);
+				break;
+			case 6:
 				cell.setCellValue("Recall");
 				cell.setCellStyle(headerStyle);
 				break;
@@ -139,6 +143,9 @@ public class ReportCreator {
 				cell.setCellValue(experimentEvaluation.accuracy());
 				break;
 			case 5:
+				cell.setCellValue(experimentEvaluation.precision());
+				break;
+			case 6:
 				cell.setCellValue(experimentEvaluation.recall());
 				break;
 			}
