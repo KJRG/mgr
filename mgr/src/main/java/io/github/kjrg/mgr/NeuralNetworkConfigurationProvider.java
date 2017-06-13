@@ -37,7 +37,7 @@ public class NeuralNetworkConfigurationProvider {
 		// Get the properties
 		int numberOfInputs = Integer.parseInt(properties.getProperty("network_architecture.number_of_inputs"));
 		String numbersOfHiddenNeuronsProperty = properties
-				.getProperty("network_architecture.numbers_of_hidden_neurons");
+				.getProperty("network_architecture.numbers_of_neurons_in_hidden_layer");
 		int numberOfClasses = Integer.parseInt(properties.getProperty("network_architecture.number_of_outputs"));
 
 		int seed = Integer.parseInt(properties.getProperty("seed"));
