@@ -68,7 +68,7 @@ public class ReportCreator {
 				cell.setCellStyle(headerStyle);
 				break;
 			case 1:
-				cell.setCellValue("Acivation function");
+				cell.setCellValue("Activation function");
 				cell.setCellStyle(headerStyle);
 				break;
 			case 2:
